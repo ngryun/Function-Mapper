@@ -1,0 +1,557 @@
+/* CSS Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #f2f2f7;
+    min-height: 100vh;
+    color: #1d1d1f;
+    line-height: 1.47059;
+    font-weight: 400;
+    letter-spacing: -0.022em;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px;
+}
+
+/* Header with language selector */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    background: white;
+    padding: 20px 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    color: #1d1d1f;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.03em;
+}
+
+.language-selector select {
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.language-selector select:focus {
+    outline: none;
+    border-color: #007aff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.language-selector select:hover {
+    background: white;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content Layout */
+.main-content {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+/* Controls Panel (Left Side) */
+.controls-panel {
+    flex: 0 0 350px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    height: fit-content;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #1d1d1f;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+}
+
+.instruction-text {
+    color: #007aff !important;
+    font-style: normal;
+    font-weight: 400;
+    text-align: center;
+    padding: 12px 16px;
+    background: rgba(0, 122, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 122, 255, 0.1);
+}
+
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 400;
+    background: #f5f5f7;
+    transition: all 0.2s ease;
+    color: #1d1d1f;
+}
+
+.input-group input[type="text"]:focus {
+    outline: none;
+    border-color: #007aff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.input-group input[type="text"]:hover {
+    background: white;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.input-group input[type="range"] {
+    width: 70%;
+    margin-right: 10px;
+}
+
+#font-size-value {
+    font-weight: bold;
+    color: #3498db;
+}
+
+.checkbox-group {
+    margin: 25px 0;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.function-hint {
+    margin-top: 5px;
+    padding-left: 28px; /* Align with checkbox text */
+}
+
+.function-hint small {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+button {
+    padding: 12px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+    background: #f5f5f7;
+    color: #1d1d1f;
+}
+
+button:hover {
+    background: white;
+    border-color: rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Styles */
+#inverse-btn {
+    background: #ff3b30;
+    color: white;
+    border-color: transparent;
+}
+
+#inverse-btn:hover {
+    background: #ff2d20;
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+}
+
+#remove-arrows-btn {
+    background: #007aff;
+    color: white;
+    border-color: transparent;
+}
+
+#remove-arrows-btn:hover {
+    background: #0056cc;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+#save-btn.primary, #save-svg-btn.primary {
+    background: #34c759;
+    color: white;
+    font-weight: 600;
+    border-color: transparent;
+}
+
+#save-btn.primary:hover, #save-svg-btn.primary:hover {
+    background: #28cd41;
+    box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+}
+
+/* Canvas Panel (Right Side) */
+.canvas-panel {
+    flex: 1;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-canvas {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    cursor: crosshair;
+    background: white;
+}
+
+#main-canvas:hover {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* SVG Styles */
+.domain-ellipse, .codomain-ellipse, .third-set-ellipse {
+    fill: none;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.element-text {
+    font-family: 'Times New Roman', 'STIX Two Math', 'Latin Modern Math', 'Computer Modern', serif;
+    font-size: 18px;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: #333;
+    cursor: pointer;
+    user-select: none;
+    font-style: italic; /* Math variables are typically italic */
+}
+
+.element-text:hover {
+    fill: #3498db;
+}
+
+.element-selected {
+    fill: #e74c3c !important;
+}
+
+.set-label {
+    font-family: 'Times New Roman', 'STIX Two Math', 'Latin Modern Math', 'Computer Modern', serif;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: normal; /* Sets are upright (roman), not italic */
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: #333;
+}
+
+.function-arrow {
+    stroke: #333;
+    stroke-width: 2;
+    fill: none;
+}
+
+.relation-arrow {
+    stroke: #333;
+    stroke-width: 1.5;
+    fill: none;
+}
+
+.function-name {
+    font-family: 'Times New Roman', 'STIX Two Math', 'Latin Modern Math', 'Computer Modern', serif;
+    font-size: 24px;
+    font-weight: bold;
+    font-style: italic;
+    text-anchor: middle;
+    dominant-baseline: central;
+    fill: #333;
+    cursor: pointer;
+    transition: fill 0.2s ease;
+}
+
+.function-name:hover {
+    fill: #3498db;
+}
+
+/* Selection highlight */
+.element-highlight {
+    fill: none;
+    stroke: #e74c3c;
+    stroke-width: 3;
+    r: 15;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 20px 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.footer-left, .footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-right {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.footer span {
+    color: #1d1d1f;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.footer small {
+    color: #86868b;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.footer a {
+    color: #007aff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    transition: opacity 0.2s ease;
+}
+
+.footer a:hover {
+    opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100% !important; /* Override dynamic max-width for mobile */
+        padding: 10px;
+    }
+    
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .controls-panel {
+        flex: none;
+    }
+    
+    #main-canvas {
+        width: 100%;
+        height: 400px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Large screen adjustments for composition mode */
+@media (min-width: 1200px) {
+    .container {
+        padding: 20px 40px; /* More padding on larger screens */
+    }
+}
+
+/* Toast notification styles */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background: #27ae60;
+}
+
+.toast.error {
+    background: #e74c3c;
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Selection highlight circle */
+.selection-highlight {
+    pointer-events: none;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+}
+
+.modal-content {
+    background: white;
+    margin: 15% auto;
+    padding: 32px;
+    border-radius: 16px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-bottom: 24px;
+    color: #1d1d1f;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+#function-name-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 24px;
+    text-align: center;
+    font-family: 'Times New Roman', serif;
+    font-style: italic;
+    ime-mode: disabled;
+    background: #f5f5f7;
+    transition: all 0.2s ease;
+    color: #1d1d1f;
+}
+
+#function-name-input:focus {
+    outline: none;
+    border-color: #007aff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    background: #f5f5f7;
+    color: #1d1d1f;
+}
+
+.modal-btn.primary {
+    background: #007aff;
+    color: white;
+    border-color: transparent;
+}
+
+.modal-btn.primary:hover {
+    background: #0056cc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.modal-btn:not(.primary):hover {
+    background: white;
+    border-color: rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

@@ -99,6 +99,23 @@ h1 {
     letter-spacing: -0.01em;
 }
 
+.input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.name-input {
+    width: 60px !important;
+    flex-shrink: 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+.elements-input {
+    flex: 1;
+}
+
 .instruction-text {
     color: #007aff !important;
     font-style: normal;

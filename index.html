@@ -23,19 +23,28 @@
             <!-- Left Panel - Controls -->
             <div class="controls-panel">
                 <div class="input-group">
-                    <label for="domain-input" data-i18n="domain-label">Domain (e.g. a,b,c):</label>
-                    <input type="text" id="domain-input" value="a,b,c,d" data-i18n-placeholder="domain-placeholder">
+                    <label data-i18n="domain-label">Domain (e.g. a,b,c):</label>
+                    <div class="input-row">
+                        <input type="text" id="domain-name-input" value="X" placeholder="Name" class="name-input">
+                        <input type="text" id="domain-input" value="a,b,c,d" data-i18n-placeholder="domain-placeholder" class="elements-input">
+                    </div>
                 </div>
-                
+
                 <div class="input-group">
-                    <label for="codomain-input" data-i18n="codomain-label">Codomain (e.g. x,y,z):</label>
-                    <input type="text" id="codomain-input" value="1,2,3" data-i18n-placeholder="codomain-placeholder">
+                    <label data-i18n="codomain-label">Codomain (e.g. x,y,z):</label>
+                    <div class="input-row">
+                        <input type="text" id="codomain-name-input" value="Y" placeholder="Name" class="name-input">
+                        <input type="text" id="codomain-input" value="1,2,3" data-i18n-placeholder="codomain-placeholder" class="elements-input">
+                    </div>
                 </div>
-                
+
                 <!-- Composition function third set (hidden by default) -->
                 <div class="input-group" id="third-set-group" style="display: none;">
-                    <label for="third-set-input" data-i18n="third-set-label">Third Set (e.g. p,q,r):</label>
-                    <input type="text" id="third-set-input" value="p,q,r" data-i18n-placeholder="third-set-placeholder">
+                    <label data-i18n="third-set-label">Third Set (e.g. p,q,r):</label>
+                    <div class="input-row">
+                        <input type="text" id="third-set-name-input" value="Z" placeholder="Name" class="name-input">
+                        <input type="text" id="third-set-input" value="p,q,r" data-i18n-placeholder="third-set-placeholder" class="elements-input">
+                    </div>
                 </div>
                 
                 <div class="input-group">

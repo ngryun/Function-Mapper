@@ -20,7 +20,11 @@ const state = {
     currentLanguage: 'en',
     // Composition function state
     compositionMode: false,
-    secondFunctionName: 'g'
+    secondFunctionName: 'g',
+    // Set names
+    domainName: 'X',
+    codomainName: 'Y',
+    thirdSetName: 'Z'
 };
 
 // Language translations
@@ -137,6 +141,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 
 // DOM Elements
 let canvas, domainInput, codomainInput, thirdSetInput, fontSizeSlider, fontSizeValue;
+let domainNameInput, codomainNameInput, thirdSetNameInput;
 let showFunctionCheckbox, compositionModeCheckbox, inverseBtnElement, removeArrowsBtn, saveBtn;
 let thirdSetGroup;
 
@@ -152,6 +157,9 @@ function initializeElements() {
     domainInput = document.getElementById('domain-input');
     codomainInput = document.getElementById('codomain-input');
     thirdSetInput = document.getElementById('third-set-input');
+    domainNameInput = document.getElementById('domain-name-input');
+    codomainNameInput = document.getElementById('codomain-name-input');
+    thirdSetNameInput = document.getElementById('third-set-name-input');
     thirdSetGroup = document.getElementById('third-set-group');
     fontSizeSlider = document.getElementById('font-size');
     fontSizeValue = document.getElementById('font-size-value');
@@ -160,7 +168,7 @@ function initializeElements() {
     inverseBtnElement = document.getElementById('inverse-btn');
     removeArrowsBtn = document.getElementById('remove-arrows-btn');
     saveBtn = document.getElementById('save-btn');
-    
+
     // Initialize language
     const savedLanguage = localStorage.getItem('preferred-language') || detectBrowserLanguage();
     state.currentLanguage = savedLanguage;
@@ -172,12 +180,40 @@ function setupEventListeners() {
     // Input field event listeners
     domainInput.addEventListener('input', debounce(drawEllipses, 300));
     domainInput.addEventListener('blur', drawEllipses);
-    
+
     codomainInput.addEventListener('input', debounce(drawEllipses, 300));
     codomainInput.addEventListener('blur', drawEllipses);
-    
+
     thirdSetInput.addEventListener('input', debounce(drawEllipses, 300));
     thirdSetInput.addEventListener('blur', drawEllipses);
+
+    // Name input field event listeners
+    domainNameInput.addEventListener('input', function() {
+        state.domainName = this.value.trim() || 'X';
+        debounce(drawEllipses, 300)();
+    });
+    domainNameInput.addEventListener('blur', function() {
+        state.domainName = this.value.trim() || 'X';
+        drawEllipses();
+    });
+
+    codomainNameInput.addEventListener('input', function() {
+        state.codomainName = this.value.trim() || 'Y';
+        debounce(drawEllipses, 300)();
+    });
+    codomainNameInput.addEventListener('blur', function() {
+        state.codomainName = this.value.trim() || 'Y';
+        drawEllipses();
+    });
+
+    thirdSetNameInput.addEventListener('input', function() {
+        state.thirdSetName = this.value.trim() || 'Z';
+        debounce(drawEllipses, 300)();
+    });
+    thirdSetNameInput.addEventListener('blur', function() {
+        state.thirdSetName = this.value.trim() || 'Z';
+        drawEllipses();
+    });
     
     // Font size slider
     fontSizeSlider.addEventListener('input', function() {
@@ -378,6 +414,41 @@ function parseLatexLike(text) {
     }
     
     return parts;
+}
+
+// Helper function to create a text label with background
+function createTextWithBackground(x, y, text, className, fontSize) {
+    const group = document.createElementNS(SVG_NS, 'g');
+
+    // Create text element first to measure its size
+    const textElement = createMathText(x, y, text, className, fontSize);
+    group.appendChild(textElement);
+
+    // Temporarily add to canvas to measure
+    canvas.appendChild(group);
+
+    // Get bounding box of the text
+    const bbox = textElement.getBBox ? textElement.getBBox() :
+                 (textElement.querySelector ? textElement.getBBox() : { x: x - fontSize/2, y: y - fontSize/2, width: fontSize, height: fontSize });
+
+    // Create background rectangle with padding
+    const padding = fontSize * 0.3;
+    const bg = document.createElementNS(SVG_NS, 'rect');
+    bg.setAttribute('x', bbox.x - padding);
+    bg.setAttribute('y', bbox.y - padding);
+    bg.setAttribute('width', bbox.width + padding * 2);
+    bg.setAttribute('height', bbox.height + padding * 2);
+    bg.setAttribute('fill', 'white');
+    bg.setAttribute('stroke', 'none');
+    bg.setAttribute('rx', '4'); // Rounded corners
+
+    // Remove group temporarily
+    canvas.removeChild(group);
+
+    // Insert background first, then text
+    group.insertBefore(bg, textElement);
+
+    return group;
 }
 
 // Calculate ellipse parameters
@@ -633,107 +704,62 @@ function drawEllipses() {
     const labelSize = Math.max(24, state.fontSize * 1.1);
     
     if (state.compositionMode) {
-        // Domain label (A) with white background
-        const domainBg = document.createElementNS(SVG_NS, 'rect');
+        // Domain label with dynamic background
         const domainLabelX = centerX - 2.5 * b * scale;
         const domainLabelY = centerY - a * scale;
-        domainBg.setAttribute('x', domainLabelX - labelSize * 0.4);
-        domainBg.setAttribute('y', domainLabelY - labelSize * 0.4);
-        domainBg.setAttribute('width', labelSize * 0.8);
-        domainBg.setAttribute('height', labelSize * 0.8);
-        domainBg.setAttribute('fill', 'white');
-        domainBg.setAttribute('stroke', 'none');
-        canvas.appendChild(domainBg);
-        
-        const domainLabel = createMathText(
-            domainLabelX, 
-            domainLabelY, 
-            'X', 
-            'set-label', 
+        const domainLabel = createTextWithBackground(
+            domainLabelX,
+            domainLabelY,
+            state.domainName,
+            'set-label',
             labelSize
         );
         canvas.appendChild(domainLabel);
-        
-        // Codomain label (B) with white background
-        const codomainBg = document.createElementNS(SVG_NS, 'rect');
+
+        // Codomain label with dynamic background
         const codomainLabelX = centerX;
         const codomainLabelY = centerY - a * scale;
-        codomainBg.setAttribute('x', codomainLabelX - labelSize * 0.4);
-        codomainBg.setAttribute('y', codomainLabelY - labelSize * 0.4);
-        codomainBg.setAttribute('width', labelSize * 0.8);
-        codomainBg.setAttribute('height', labelSize * 0.8);
-        codomainBg.setAttribute('fill', 'white');
-        codomainBg.setAttribute('stroke', 'none');
-        canvas.appendChild(codomainBg);
-        
-        const codomainLabel = createMathText(
-            codomainLabelX, 
-            codomainLabelY, 
-            'Y', 
-            'set-label', 
+        const codomainLabel = createTextWithBackground(
+            codomainLabelX,
+            codomainLabelY,
+            state.codomainName,
+            'set-label',
             labelSize
         );
         canvas.appendChild(codomainLabel);
-        
-        // Third set label (C) with white background
-        const thirdSetBg = document.createElementNS(SVG_NS, 'rect');
+
+        // Third set label with dynamic background
         const thirdSetLabelX = centerX + 2.5 * b * scale;
         const thirdSetLabelY = centerY - a * scale;
-        thirdSetBg.setAttribute('x', thirdSetLabelX - labelSize * 0.4);
-        thirdSetBg.setAttribute('y', thirdSetLabelY - labelSize * 0.4);
-        thirdSetBg.setAttribute('width', labelSize * 0.8);
-        thirdSetBg.setAttribute('height', labelSize * 0.8);
-        thirdSetBg.setAttribute('fill', 'white');
-        thirdSetBg.setAttribute('stroke', 'none');
-        canvas.appendChild(thirdSetBg);
-        
-        const thirdSetLabel = createMathText(
-            thirdSetLabelX, 
-            thirdSetLabelY, 
-            'Z', 
-            'set-label', 
+        const thirdSetLabel = createTextWithBackground(
+            thirdSetLabelX,
+            thirdSetLabelY,
+            state.thirdSetName,
+            'set-label',
             labelSize
         );
         canvas.appendChild(thirdSetLabel);
     } else {
-        // Domain label (X) with white background
-        const domainBg = document.createElementNS(SVG_NS, 'rect');
+        // Domain label with dynamic background
         const domainLabelX = centerX - 1.5 * b * scale;
         const domainLabelY = centerY - a * scale;
-        domainBg.setAttribute('x', domainLabelX - labelSize * 0.4);
-        domainBg.setAttribute('y', domainLabelY - labelSize * 0.4);
-        domainBg.setAttribute('width', labelSize * 0.8);
-        domainBg.setAttribute('height', labelSize * 0.8);
-        domainBg.setAttribute('fill', 'white');
-        domainBg.setAttribute('stroke', 'none');
-        canvas.appendChild(domainBg);
-        
-        const domainLabel = createMathText(
-            domainLabelX, 
-            domainLabelY, 
-            'X', 
-            'set-label', 
+        const domainLabel = createTextWithBackground(
+            domainLabelX,
+            domainLabelY,
+            state.domainName,
+            'set-label',
             labelSize
         );
         canvas.appendChild(domainLabel);
-        
-        // Codomain label (Y) with white background
-        const codomainBg = document.createElementNS(SVG_NS, 'rect');
+
+        // Codomain label with dynamic background
         const codomainLabelX = centerX + 1.5 * b * scale;
         const codomainLabelY = centerY - a * scale;
-        codomainBg.setAttribute('x', codomainLabelX - labelSize * 0.4);
-        codomainBg.setAttribute('y', codomainLabelY - labelSize * 0.4);
-        codomainBg.setAttribute('width', labelSize * 0.8);
-        codomainBg.setAttribute('height', labelSize * 0.8);
-        codomainBg.setAttribute('fill', 'white');
-        codomainBg.setAttribute('stroke', 'none');
-        canvas.appendChild(codomainBg);
-        
-        const codomainLabel = createMathText(
-            codomainLabelX, 
-            codomainLabelY, 
-            'Y', 
-            'set-label', 
+        const codomainLabel = createTextWithBackground(
+            codomainLabelX,
+            codomainLabelY,
+            state.codomainName,
+            'set-label',
             labelSize
         );
         canvas.appendChild(codomainLabel);

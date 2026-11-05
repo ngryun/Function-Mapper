@@ -4,97 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Function Mapper - Web Version</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 data-i18n="title">Function Mapper</h1>
+            <div class="brand">
+                <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect width="32" height="32" rx="9" />
+                    <ellipse cx="9" cy="16" rx="3.6" ry="8" />
+                    <ellipse cx="23" cy="16" rx="3.6" ry="8" />
+                    <path d="M10.5 16 H20.5" />
+                    <path d="M18 13.5 L20.5 16 L18 18.5" />
+                </svg>
+                <h1 data-i18n="title">Function Mapper</h1>
+            </div>
             <div class="language-selector">
-                <select id="language-select">
+                <select id="language-select" aria-label="Language">
                     <option value="en">🇺🇸 English</option>
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="ja">🇯🇵 日本語</option>
                 </select>
             </div>
         </div>
-        
+
         <div class="main-content">
             <!-- Left Panel - Controls -->
             <div class="controls-panel">
-                <div class="input-group">
-                    <label data-i18n="domain-label">Domain (e.g. a,b,c):</label>
-                    <div class="input-row">
-                        <input type="text" id="domain-name-input" value="X" placeholder="Name" class="name-input">
-                        <input type="text" id="domain-input" value="a,b,c,d" data-i18n-placeholder="domain-placeholder" class="elements-input">
-                    </div>
-                </div>
+                <section class="panel-section">
+                    <h2 class="section-title" data-i18n="section-sets">Sets</h2>
 
-                <div class="input-group">
-                    <label data-i18n="codomain-label">Codomain (e.g. x,y,z):</label>
-                    <div class="input-row">
-                        <input type="text" id="codomain-name-input" value="Y" placeholder="Name" class="name-input">
-                        <input type="text" id="codomain-input" value="1,2,3" data-i18n-placeholder="codomain-placeholder" class="elements-input">
+                    <div class="input-group">
+                        <label data-i18n="domain-label">Domain (e.g. a,b,c)</label>
+                        <div class="input-row">
+                            <input type="text" id="domain-name-input" value="X" placeholder="Name" class="name-input">
+                            <input type="text" id="domain-input" value="a,b,c,d" data-i18n-placeholder="domain-placeholder" class="elements-input">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Composition function third set (hidden by default) -->
-                <div class="input-group" id="third-set-group" style="display: none;">
-                    <label data-i18n="third-set-label">Third Set (e.g. p,q,r):</label>
-                    <div class="input-row">
-                        <input type="text" id="third-set-name-input" value="Z" placeholder="Name" class="name-input">
-                        <input type="text" id="third-set-input" value="p,q,r" data-i18n-placeholder="third-set-placeholder" class="elements-input">
+                    <div class="input-group">
+                        <label data-i18n="codomain-label">Codomain (e.g. x,y,z)</label>
+                        <div class="input-row">
+                            <input type="text" id="codomain-name-input" value="Y" placeholder="Name" class="name-input">
+                            <input type="text" id="codomain-input" value="1,2,3" data-i18n-placeholder="codomain-placeholder" class="elements-input">
+                        </div>
                     </div>
-                </div>
-                
-                <div class="input-group">
-                    <label for="font-size" data-i18n="font-size-label">Font Size:</label>
-                    <input type="range" id="font-size" min="10" max="40" value="27">
-                    <span id="font-size-value">27</span>
-                </div>
-                
-                <div class="input-group">
-                    <label class="instruction-text" data-i18n="instruction">Click elements to draw arrows: Domain → Codomain</label>
-                </div>
-                
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="show-function" checked>
-                        <span data-i18n="show-function">Show function Name</span>
-                    </label>
-                    <div class="function-hint">
-                        <small data-i18n="function-hint">Click function name to change</small>
+
+                    <!-- Composition function third set (hidden by default) -->
+                    <div class="input-group" id="third-set-group" style="display: none;">
+                        <label data-i18n="third-set-label">Third Set (e.g. p,q,r)</label>
+                        <div class="input-row">
+                            <input type="text" id="third-set-name-input" value="Z" placeholder="Name" class="name-input">
+                            <input type="text" id="third-set-input" value="p,q,r" data-i18n-placeholder="third-set-placeholder" class="elements-input">
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Composition function mode checkbox -->
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="composition-mode">
-                        <span data-i18n="composition-mode">Composition Function Mode</span>
-                    </label>
-                </div>
-                
-                <div class="button-group">
-                    <button id="inverse-btn" data-i18n="inverse-btn">Inverse Arrows & Function Name</button>
-                    <button id="remove-arrows-btn" data-i18n="remove-arrows-btn">Remove Relation Arrows</button>
-                    <button id="save-btn" class="primary" data-i18n="save-btn">Save as PNG</button>
-                    <button id="save-svg-btn" class="primary" data-i18n="save-svg-btn">Save as SVG</button>
-                </div>
+                </section>
+
+                <section class="panel-section">
+                    <h2 class="section-title" data-i18n="section-options">Options</h2>
+
+                    <div class="input-group slider-group">
+                        <label for="font-size" data-i18n="font-size-label">Font Size</label>
+                        <input type="range" id="font-size" min="10" max="40" value="27">
+                        <span id="font-size-value">27</span>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label>
+                            <span data-i18n="show-function">Show function Name</span>
+                            <input type="checkbox" id="show-function" checked>
+                        </label>
+                        <div class="function-hint">
+                            <small data-i18n="function-hint">Click function name to change</small>
+                        </div>
+                    </div>
+
+                    <!-- Composition function mode checkbox -->
+                    <div class="checkbox-group">
+                        <label>
+                            <span data-i18n="composition-mode">Composition Function Mode</span>
+                            <input type="checkbox" id="composition-mode">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="panel-section">
+                    <h2 class="section-title" data-i18n="section-edit">Edit</h2>
+                    <div class="button-group">
+                        <button id="inverse-btn">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+                            <span data-i18n="inverse-btn">Inverse Arrows &amp; Function Name</span>
+                        </button>
+                        <button id="remove-arrows-btn">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+                            <span data-i18n="remove-arrows-btn">Remove Relation Arrows</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="panel-section">
+                    <h2 class="section-title" data-i18n="section-export">Export</h2>
+                    <div class="button-group export-group">
+                        <button id="save-btn" class="primary">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+                            <span data-i18n="save-btn">Save as PNG</span>
+                        </button>
+                        <button id="save-svg-btn">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
+                            <span data-i18n="save-svg-btn">Save as SVG</span>
+                        </button>
+                    </div>
+                </section>
             </div>
-            
+
             <!-- Right Panel - Canvas -->
             <div class="canvas-panel">
+                <p class="canvas-hint">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4.1 12 6"/><path d="m5.1 8-2.9-.8"/><path d="m6 12-1.9 2"/><path d="M7.2 2.2 8 5.1"/><path d="M9.04 9.24a.5.5 0 0 1 .65-.65l11 4.5a.5.5 0 0 1-.06.95l-4.21 1.09a2 2 0 0 0-1.43 1.43l-1.09 4.21a.5.5 0 0 1-.95.06z"/></svg>
+                    <span data-i18n="instruction">Click elements to draw arrows: Domain → Codomain</span>
+                </p>
                 <svg id="main-canvas" width="700" height="600" viewBox="0 0 700 600">
                     <!-- SVG content will be generated by JavaScript -->
                 </svg>
             </div>
         </div>
-        
+
         <div class="footer">
             <div class="footer-left">
                 <span data-i18n="footer-made-by">Made by Namgung Yeon @seolakhigh school 2025</span>
-                <br>
                 <small data-i18n="footer-copyright">© 2025 Namgung Yeon. All rights reserved.</small>
             </div>
             <div class="footer-right">
@@ -102,19 +141,19 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Custom modal for function name input -->
     <div id="function-name-modal" class="modal">
         <div class="modal-content">
             <h3 data-i18n="modal-title">Change Function Name</h3>
             <input type="text" id="function-name-input" data-i18n-placeholder="modal-placeholder">
             <div class="modal-buttons">
-                <button id="modal-ok" class="modal-btn primary" data-i18n="modal-ok">OK</button>
                 <button id="modal-cancel" class="modal-btn" data-i18n="modal-cancel">Cancel</button>
+                <button id="modal-ok" class="modal-btn primary" data-i18n="modal-ok">OK</button>
             </div>
         </div>
     </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>

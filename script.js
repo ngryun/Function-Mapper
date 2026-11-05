@@ -66,9 +66,13 @@ const state = {
 const translations = {
     en: {
         'title': 'Function Mapper',
-        'domain-label': 'Domain (e.g. a,b,c):',
-        'codomain-label': 'Codomain (e.g. x,y,z):',
-        'font-size-label': 'Font Size:',
+        'section-sets': 'Sets',
+        'section-options': 'Options',
+        'section-edit': 'Edit',
+        'section-export': 'Export',
+        'domain-label': 'Domain (e.g. a,b,c)',
+        'codomain-label': 'Codomain (e.g. x,y,z)',
+        'font-size-label': 'Font Size',
         'instruction': 'Click elements to draw arrows: Domain → Codomain',
         'show-function': 'Show function Name',
         'function-hint': 'Click function name to change',
@@ -87,7 +91,7 @@ const translations = {
         'modal-cancel': 'Cancel',
         'domain-placeholder': 'Enter domain elements',
         'codomain-placeholder': 'Enter codomain elements',
-        'third-set-label': 'Third Set (e.g. p,q,r):',
+        'third-set-label': 'Third Set (e.g. p,q,r)',
         'third-set-placeholder': 'Enter third set elements',
         'composition-mode': 'Composition Function Mode',
         'toast-element-selected': '{from} element selected. Click or drag to a {to} element.',
@@ -105,9 +109,13 @@ const translations = {
     },
     ko: {
         'title': '함수 대응 관계 그리기',
-        'domain-label': '정의역 (예: a,b,c):',
-        'codomain-label': '공역 (예: x,y,z):',
-        'font-size-label': '글꼴 크기:',
+        'section-sets': '집합',
+        'section-options': '옵션',
+        'section-edit': '편집',
+        'section-export': '내보내기',
+        'domain-label': '정의역 (예: a,b,c)',
+        'codomain-label': '공역 (예: x,y,z)',
+        'font-size-label': '글꼴 크기',
         'instruction': '원소를 클릭하여 화살표 그리기: 정의역 → 공역',
         'show-function': '함수명 표시',
         'function-hint': '함수명을 클릭하여 변경',
@@ -126,7 +134,7 @@ const translations = {
         'modal-cancel': '취소',
         'domain-placeholder': '정의역 원소 입력',
         'codomain-placeholder': '공역 원소 입력',
-        'third-set-label': '세 번째 집합 (예: p,q,r):',
+        'third-set-label': '세 번째 집합 (예: p,q,r)',
         'third-set-placeholder': '세 번째 집합 원소 입력',
         'composition-mode': '합성함수 모드',
         'toast-element-selected': '{from}의 원소가 선택되었습니다. {to}의 원소를 클릭하거나 드래그하세요.',
@@ -144,9 +152,13 @@ const translations = {
     },
     ja: {
         'title': '関数対応関係作図',
-        'domain-label': '定義域 (例: a,b,c):',
-        'codomain-label': '終域 (例: x,y,z):',
-        'font-size-label': 'フォントサイズ:',
+        'section-sets': '集合',
+        'section-options': 'オプション',
+        'section-edit': '編集',
+        'section-export': '書き出し',
+        'domain-label': '定義域 (例: a,b,c)',
+        'codomain-label': '終域 (例: x,y,z)',
+        'font-size-label': 'フォントサイズ',
         'instruction': '要素をクリックして矢印を描く: 定義域 → 終域',
         'show-function': '関数名を表示',
         'function-hint': '関数名をクリックして変更',
@@ -165,7 +177,7 @@ const translations = {
         'modal-cancel': 'キャンセル',
         'domain-placeholder': '定義域要素を入力',
         'codomain-placeholder': '終域要素を入力',
-        'third-set-label': '第三集合 (例: p,q,r):',
+        'third-set-label': '第三集合 (例: p,q,r)',
         'third-set-placeholder': '第三集合要素を入力',
         'composition-mode': '合成関数モード',
         'toast-element-selected': '{from}の要素が選択されました。{to}の要素をクリックまたはドラッグしてください。',
@@ -203,7 +215,7 @@ function initializeElements() {
 
     // Browsers may restore form controls on reload, so start from their current values
     state.fontSize = parseInt(fontSizeSlider.value, 10);
-    fontSizeValue.textContent = fontSizeSlider.value;
+    updateFontSizeDisplay();
     state.showFunction = showFunctionCheckbox.checked;
     state.compositionMode = compositionModeCheckbox.checked;
     applyCompositionLayout();
@@ -213,6 +225,13 @@ function initializeElements() {
     state.currentLanguage = translations[savedLanguage] ? savedLanguage : detectBrowserLanguage();
     document.getElementById('language-select').value = state.currentLanguage;
     updateLanguage();
+}
+
+// Show the slider value and fill the track up to the thumb
+function updateFontSizeDisplay() {
+    const { min, max, value } = fontSizeSlider;
+    fontSizeValue.textContent = value;
+    fontSizeSlider.style.setProperty('--fill', `${((value - min) / (max - min)) * 100}%`);
 }
 
 function setupEventListeners() {
@@ -230,7 +249,7 @@ function setupEventListeners() {
     // Font size slider
     fontSizeSlider.addEventListener('input', function() {
         state.fontSize = parseInt(this.value, 10);
-        fontSizeValue.textContent = this.value;
+        updateFontSizeDisplay();
         render();
     });
 

@@ -11,8 +11,11 @@ const SET_INPUTS = {
     'third-set': { nameId: 'third-set-name-input', elementsId: 'third-set-input', defaultName: 'Z' }
 };
 
-// Pointer interaction tuning (SVG user units)
-const DRAG_THRESHOLD = 8;
+// Pointer interaction tuning. Screen distances are in CSS pixels so they hold
+// on phones, where the drawing is scaled down to the screen width.
+const DRAG_THRESHOLD_PX = { mouse: 5, pen: 8, touch: 12 };
+const HIT_RADIUS_PX = { mouse: 12, pen: 16, touch: 26 };
+// Snap distance while dragging, in SVG user units
 const SNAP_DISTANCE = 50;
 
 // Hangul, kana and CJK ideographs are drawn upright in a sans-serif font
@@ -269,9 +272,10 @@ function setupEventListeners() {
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
     canvas.addEventListener('pointercancel', onPointerCancel);
-    // Keep a touch drag that starts on an element from scrolling the page
+    // Keep a touch drag that starts on (or near) an element from scrolling the page
     canvas.addEventListener('touchstart', function(event) {
-        const info = getElementInfo(event.target);
+        const touch = event.changedTouches[0];
+        const info = touch && findElementAt(touch.clientX, touch.clientY, 'touch', event.target);
         if (info && getMappingFrom(info.type)) {
             event.preventDefault();
         }
@@ -694,6 +698,22 @@ function getSvgPoint(event) {
     return point.matrixTransform(canvas.getScreenCTM().inverse());
 }
 
+// Pointer tuning value for a pointer type, in SVG user units
+function pointerDistance(table, pointerType) {
+    const px = table[pointerType] || table.touch;
+    return px / canvas.getScreenCTM().a;
+}
+
+// Element under a screen point, or the closest one within finger reach,
+// since element labels are only a few pixels wide on a phone
+function findElementAt(clientX, clientY, pointerType, target) {
+    const direct = getElementInfo(target);
+    if (direct || !state.layout || !state.layout.sets) return direct;
+
+    const point = new DOMPoint(clientX, clientY).matrixTransform(canvas.getScreenCTM().inverse());
+    return findClosestElement(point, pointerDistance(HIT_RADIUS_PX, pointerType));
+}
+
 // Record a relation arrow unless the same one is already drawn
 function addArrow(start, end) {
     const exists = state.arrows.some(arrow =>
@@ -722,8 +742,16 @@ function onPointerDown(event) {
     // Function names handle their own clicks
     if (event.target.closest('[data-function-type]')) return;
 
-    const info = getElementInfo(event.target);
-    state.pointer = { id: event.pointerId, info, origin: getSvgPoint(event), dragging: false, target: null };
+    const info = findElementAt(event.clientX, event.clientY, event.pointerType, event.target);
+    state.pointer = {
+        id: event.pointerId,
+        type: event.pointerType,
+        info,
+        startX: event.clientX,
+        startY: event.clientY,
+        dragging: false,
+        target: null
+    };
 
     if (info && getMappingFrom(info.type)) {
         // Keep receiving moves while dragging outside the element
@@ -737,13 +765,14 @@ function onPointerMove(event) {
     if (!pointer || pointer.id !== event.pointerId || !pointer.info) return;
     if (!getMappingFrom(pointer.info.type)) return;
 
-    const point = getSvgPoint(event);
     if (!pointer.dragging) {
-        if (Math.hypot(point.x - pointer.origin.x, point.y - pointer.origin.y) < DRAG_THRESHOLD) return;
+        // A finger wobbles a few pixels during a tap; only a clear move starts a drag
+        const moved = Math.hypot(event.clientX - pointer.startX, event.clientY - pointer.startY);
+        if (moved < (DRAG_THRESHOLD_PX[pointer.type] || DRAG_THRESHOLD_PX.touch)) return;
         pointer.dragging = true;
         setSelection(pointer.info);
     }
-    updateDragPreview(pointer, point);
+    updateDragPreview(pointer, getSvgPoint(event));
 }
 
 function onPointerUp(event) {
@@ -816,33 +845,42 @@ function finishDrag(pointer, event) {
     const mapping = getMappingFrom(pointer.info.type);
     clearSelection();
 
-    let target = pointer.target;
-    if (!target) {
-        const dropped = getElementInfo(document.elementFromPoint(event.clientX, event.clientY));
-        target = dropped && dropped.type === mapping.to ? dropped : null;
-    }
+    const dropped = findElementAt(event.clientX, event.clientY, pointer.type,
+        document.elementFromPoint(event.clientX, event.clientY));
+    const target = pointer.target || (dropped && dropped.type === mapping.to ? dropped : null);
 
     if (target) {
         addArrow(pointer.info, target);
+    } else if (dropped && dropped.type === pointer.info.type && dropped.index === pointer.info.index) {
+        // Dragged back onto the start element: treat it as a tap and keep it selected
+        handleTap(pointer.info);
     } else {
         showToast(t('toast-invalid-target', { to: state.sets[mapping.to].name }), 'error');
     }
 }
 
-// Closest element of the target set within snap distance
-function findSnapTarget(setKey, point) {
+// Closest element to an SVG point within maxDistance, optionally only in one set
+function findClosestElement(point, maxDistance, setKey = null) {
     let closest = null;
-    let minDistance = SNAP_DISTANCE;
+    let minDistance = maxDistance;
 
-    state.layout.sets[setKey].points.forEach((p, index) => {
-        const distance = Math.hypot(point.x - p.x, point.y - p.y);
-        if (distance < minDistance) {
-            minDistance = distance;
-            closest = { type: setKey, index, element: state.sets[setKey].elements[index] };
-        }
+    Object.entries(state.layout.sets).forEach(([key, set]) => {
+        if (setKey && key !== setKey) return;
+        set.points.forEach((p, index) => {
+            const distance = Math.hypot(point.x - p.x, point.y - p.y);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closest = { type: key, index, element: state.sets[key].elements[index] };
+            }
+        });
     });
 
     return closest;
+}
+
+// Closest element of the target set within snap distance
+function findSnapTarget(setKey, point) {
+    return findClosestElement(point, SNAP_DISTANCE, setKey);
 }
 
 // Temporary arrow while dragging, snapping to a nearby target element

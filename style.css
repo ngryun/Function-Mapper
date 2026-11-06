@@ -512,6 +512,7 @@ button .icon {
     background: white;
     box-shadow: var(--shadow-paper);
     cursor: crosshair;
+    touch-action: manipulation; /* No double-tap zoom while tapping elements quickly */
 }
 
 /* SVG Styles (font sizes are set per element by script.js; keep EXPORT_STYLE there in sync) */
@@ -532,9 +533,6 @@ button .icon {
     transition: fill 0.15s ease;
 }
 
-.element-text:hover {
-    fill: var(--accent);
-}
 
 .element-selected {
     fill: var(--accent) !important;
@@ -572,13 +570,18 @@ button .icon {
     transition: fill 0.15s ease;
 }
 
-.function-name:hover {
-    fill: var(--accent);
-}
+/* Hover colors only where a real pointer hovers; on touch screens :hover sticks
+   to the last tapped element and looks like a selection */
+@media (hover: hover) {
+    .element-text:hover,
+    .function-name:hover {
+        fill: var(--accent);
+    }
 
-/* The composite name is generated, so it doesn't look editable */
-.function-name.composition-name:hover {
-    fill: #333;
+    /* The composite name is generated, so it doesn't look editable */
+    .function-name.composition-name:hover {
+        fill: #333;
+    }
 }
 
 /* Hangul, kana and CJK text is drawn upright in a sans-serif font */

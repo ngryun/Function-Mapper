@@ -632,8 +632,39 @@ button .icon {
     gap: 2px 12px;
 }
 
+.footer-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 16px;
+}
+
 .footer span {
     color: var(--text-secondary);
+}
+
+.footer-email {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.footer-email .icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-tertiary);
+}
+
+.footer-email:hover span,
+.footer-email:hover .icon {
+    color: var(--accent);
+}
+
+.footer-email:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring);
 }
 
 .footer small {

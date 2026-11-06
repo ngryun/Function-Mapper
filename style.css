@@ -515,7 +515,8 @@ button .icon {
     touch-action: manipulation; /* No double-tap zoom while tapping elements quickly */
 }
 
-/* SVG Styles (font sizes are set per element by script.js; keep EXPORT_STYLE there in sync) */
+/* SVG Styles (font sizes and the vertical position of labels are set by script.js;
+   keep EXPORT_STYLE there in sync) */
 .domain-ellipse, .codomain-ellipse, .third-set-ellipse {
     fill: none;
     stroke: #333;
@@ -525,7 +526,6 @@ button .icon {
 .element-text {
     font-family: var(--font-math);
     text-anchor: middle;
-    dominant-baseline: central;
     fill: #333;
     cursor: pointer;
     user-select: none;
@@ -543,7 +543,6 @@ button .icon {
     font-weight: bold;
     font-style: normal; /* Sets are upright (roman), not italic */
     text-anchor: middle;
-    dominant-baseline: central;
     fill: #333;
 }
 
@@ -564,7 +563,6 @@ button .icon {
     font-weight: bold;
     font-style: italic;
     text-anchor: middle;
-    dominant-baseline: central;
     fill: #333;
     cursor: pointer;
     transition: fill 0.15s ease;

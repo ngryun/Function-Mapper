@@ -27,7 +27,6 @@ const EXPORT_STYLE = `
     .element-text, .set-label, .function-name {
         font-family: 'Times New Roman', 'STIX Two Math', 'Latin Modern Math', 'Computer Modern', serif;
         text-anchor: middle;
-        dominant-baseline: central;
         fill: #333;
     }
     .element-text { font-style: italic; }
@@ -387,12 +386,32 @@ function parseLatexLike(text) {
     return parts;
 }
 
+// Append a math label whose vertical center is on y. The baseline is placed by
+// measuring the font box instead of using dominant-baseline, which Safari and
+// apps that import the SVG ignore, leaving every label sitting above its arrows.
+function appendMathText(parent, x, y, content, className, fontSize) {
+    const text = createMathText(x, y, content, className, fontSize);
+    parent.appendChild(text);
+
+    // Same font and text without sub/superscript shifts, so scripts don't move the label
+    const probe = text.cloneNode(false);
+    probe.textContent = text.textContent;
+    parent.appendChild(probe);
+    const box = probe.getBBox();
+    probe.remove();
+
+    if (box.height > 0) {
+        const baseline = 2 * y - (box.y + box.height / 2);
+        text.setAttribute('y', Math.round(baseline * 100) / 100);
+    }
+    return text;
+}
+
 // Append a text label on a white background (set names sit on top of the ellipse outline)
 function appendTextWithBackground(x, y, content, className, fontSize) {
     const group = createSvgElement('g');
-    const text = createMathText(x, y, content, className, fontSize);
-    group.appendChild(text);
     canvas.appendChild(group);
+    const text = appendMathText(group, x, y, content, className, fontSize);
 
     // Measure once the text is in the document
     const bbox = text.getBBox();
@@ -553,11 +572,13 @@ function drawSets() {
         canvas.appendChild(ellipse);
 
         state.sets[key].elements.forEach((element, i) => {
-            const text = createMathText(set.points[i].x, set.points[i].y, element, 'element-text', state.fontSize);
+            const point = set.points[i];
+            const text = appendMathText(canvas, point.x, point.y, element, 'element-text', state.fontSize);
             text.dataset.element = element;
             text.dataset.type = key;
             text.dataset.index = i;
-            canvas.appendChild(text);
+            // Arrows keep clear of wide labels such as 10, x_1 or Hangul
+            point.halfWidth = text.getBBox().width / 2;
         });
     });
 }
@@ -583,14 +604,18 @@ function createArrowLine(x1, y1, x2, y2, className) {
     return line;
 }
 
+// Horizontal distance from an element's center to where an arrow meets it
+function arrowInset(point) {
+    return Math.max(0.15 * state.layout.unit, (point.halfWidth || 0) + state.fontSize * 0.25);
+}
+
 // Draw the element-to-element arrows whose endpoints are currently visible
 function drawRelationArrows() {
-    const { unit } = state.layout;
     state.arrows.forEach(arrow => {
         const start = getElementPoint(arrow.from, arrow.fromIndex, arrow.fromElement);
         const end = getElementPoint(arrow.to, arrow.toIndex, arrow.toElement);
         if (start && end) {
-            canvas.appendChild(createArrowLine(start.x + 0.15 * unit, start.y, end.x - 0.15 * unit, end.y, 'relation-arrow'));
+            canvas.appendChild(createArrowLine(start.x + arrowInset(start), start.y, end.x - arrowInset(end), end.y, 'relation-arrow'));
         }
     });
 }
@@ -640,10 +665,9 @@ function drawCompositionArrow(nameSize) {
 
 // Clickable function name label
 function appendFunctionName(x, y, content, functionId, fontSize) {
-    const label = createMathText(x, y, content, 'function-name', fontSize);
+    const label = appendMathText(canvas, x, y, content, 'function-name', fontSize);
     label.dataset.functionType = functionId;
     label.addEventListener('click', () => openFunctionNameModal(functionId));
-    canvas.appendChild(label);
     return label;
 }
 
@@ -887,7 +911,7 @@ function findSnapTarget(setKey, point) {
 function updateDragPreview(pointer, point) {
     clearDragPreview();
 
-    const { unit, sets } = state.layout;
+    const { sets } = state.layout;
     const mapping = getMappingFrom(pointer.info.type);
     const start = getElementPoint(pointer.info.type, pointer.info.index, pointer.info.element);
     if (!start) return;
@@ -897,14 +921,14 @@ function updateDragPreview(pointer, point) {
 
     if (pointer.target) {
         const targetPoint = sets[mapping.to].points[pointer.target.index];
-        end = { x: targetPoint.x - 0.15 * unit, y: targetPoint.y };
+        end = { x: targetPoint.x - arrowInset(targetPoint), y: targetPoint.y };
 
         const snapCircle = createSvgElement('circle', { cx: targetPoint.x, cy: targetPoint.y, r: 25 });
         snapCircle.classList.add('snap-circle');
         canvas.appendChild(snapCircle);
     }
 
-    const line = createSvgElement('line', { x1: start.x + 0.15 * unit, y1: start.y, x2: end.x, y2: end.y });
+    const line = createSvgElement('line', { x1: start.x + arrowInset(start), y1: start.y, x2: end.x, y2: end.y });
     line.classList.add('temp-arrow');
     if (pointer.target) {
         line.classList.add('snapped');

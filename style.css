@@ -101,7 +101,8 @@ h1 {
     color: var(--text);
 }
 
-.language-selector select {
+.language-selector select,
+.random-row select {
     height: 36px;
     padding: 0 34px 0 12px;
     border: 1px solid var(--border);
@@ -116,11 +117,13 @@ h1 {
     appearance: none;
 }
 
-.language-selector select:hover {
+.language-selector select:hover,
+.random-row select:hover {
     border-color: var(--border-strong);
 }
 
-.language-selector select:focus-visible {
+.language-selector select:focus-visible,
+.random-row select:focus-visible {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--ring);
@@ -386,6 +389,32 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 .function-hint small {
     color: var(--text-tertiary);
     font-size: 12px;
+}
+
+/* Random mapping: kind picker and button on one row */
+.random-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.random-row select {
+    width: 100%;
+    height: 40px;
+    font-size: 13.5px;
+    text-overflow: ellipsis;
+}
+
+#random-btn {
+    background: var(--accent-soft);
+    border-color: #c7d2fe;
+    color: var(--accent);
+}
+
+#random-btn:hover {
+    background: #e0e7ff;
+    border-color: #a5b4fc;
 }
 
 /* Buttons */

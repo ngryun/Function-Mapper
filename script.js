@@ -107,7 +107,16 @@ const translations = {
         'toast-arrows-removed': 'Relation arrows removed!',
         'toast-image-saved': 'PNG image saved successfully!',
         'toast-svg-saved': 'SVG file saved successfully!',
-        'toast-save-error': 'Error saving image. Please try again.'
+        'toast-save-error': 'Error saving image. Please try again.',
+        'random-btn': 'Random',
+        'random-type-function': 'Function',
+        'random-type-injective': 'One-to-one function',
+        'random-type-bijective': 'One-to-one correspondence',
+        'random-type-constant': 'Constant function',
+        'random-type-not-function': 'Not a function',
+        'toast-random-drawn': 'Random mapping drawn: {type}',
+        'toast-random-injective-error': 'A one-to-one function needs at least as many elements in {to} as in {from}.',
+        'toast-random-bijective-error': 'A one-to-one correspondence needs the same number of elements in {from} and {to}.'
     },
     ko: {
         'title': '함수 대응 관계 그리기',
@@ -150,7 +159,16 @@ const translations = {
         'toast-arrows-removed': '관계 화살표가 제거되었습니다!',
         'toast-image-saved': 'PNG 이미지가 성공적으로 저장되었습니다!',
         'toast-svg-saved': 'SVG 파일이 성공적으로 저장되었습니다!',
-        'toast-save-error': '이미지 저장 중 오류가 발생했습니다. 다시 시도하세요.'
+        'toast-save-error': '이미지 저장 중 오류가 발생했습니다. 다시 시도하세요.',
+        'random-btn': '무작위 대응',
+        'random-type-function': '함수',
+        'random-type-injective': '일대일함수',
+        'random-type-bijective': '일대일대응',
+        'random-type-constant': '상수함수',
+        'random-type-not-function': '함수가 아닌 대응',
+        'toast-random-drawn': '무작위로 그렸습니다: {type}',
+        'toast-random-injective-error': '일대일함수를 그리려면 {to}의 원소가 {from}의 원소보다 적지 않아야 합니다.',
+        'toast-random-bijective-error': '일대일대응을 그리려면 {from}, {to}의 원소 개수가 같아야 합니다.'
     },
     ja: {
         'title': '関数対応関係作図',
@@ -193,7 +211,16 @@ const translations = {
         'toast-arrows-removed': '関係矢印が削除されました！',
         'toast-image-saved': 'PNG画像が正常に保存されました！',
         'toast-svg-saved': 'SVGファイルが正常に保存されました！',
-        'toast-save-error': '画像の保存中にエラーが発生しました。もう一度お試しください。'
+        'toast-save-error': '画像の保存中にエラーが発生しました。もう一度お試しください。',
+        'random-btn': 'ランダム対応',
+        'random-type-function': '関数',
+        'random-type-injective': '単射',
+        'random-type-bijective': '全単射',
+        'random-type-constant': '定数関数',
+        'random-type-not-function': '関数でない対応',
+        'toast-random-drawn': 'ランダムに作図しました: {type}',
+        'toast-random-injective-error': '単射を作るには、{to}の要素数が{from}の要素数以上である必要があります。',
+        'toast-random-bijective-error': '全単射を作るには、{from}と{to}の要素数が同じである必要があります。'
     }
 };
 
@@ -263,6 +290,7 @@ function setupEventListeners() {
     compositionModeCheckbox.addEventListener('change', toggleCompositionMode);
     document.getElementById('inverse-btn').addEventListener('click', reverseArrowsDirection);
     document.getElementById('remove-arrows-btn').addEventListener('click', removeRelationArrows);
+    document.getElementById('random-btn').addEventListener('click', drawRandomMapping);
     document.getElementById('save-btn').addEventListener('click', saveAsImage);
     document.getElementById('save-svg-btn').addEventListener('click', saveAsSVG);
 
@@ -1020,6 +1048,96 @@ function removeRelationArrows() {
     state.selected = null;
     render();
     showToast(t('toast-arrows-removed'), 'success');
+}
+
+function randomInt(n) {
+    return Math.floor(Math.random() * n);
+}
+
+function shuffled(items) {
+    const result = [...items];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = randomInt(i + 1);
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+// Random [fromIndex, toIndex] pairs of one kind of mapping from a set of n
+// elements to a set of m elements, or null when the sizes don't allow that kind
+function randomPairs(kind, n, m) {
+    const indices = count => Array.from({ length: count }, (_, i) => i);
+
+    switch (kind) {
+        case 'function':
+            return indices(n).map(i => [i, randomInt(m)]);
+        case 'injective':
+            return n > m ? null : shuffled(indices(m)).slice(0, n).map((j, i) => [i, j]);
+        case 'bijective':
+            return n !== m ? null : shuffled(indices(m)).map((j, i) => [i, j]);
+        case 'constant': {
+            const j = randomInt(m);
+            return indices(n).map(i => [i, j]);
+        }
+        case 'not-function': {
+            // Break a random function: leave an element without an image and/or give one two
+            const pairs = indices(n).map(i => [i, randomInt(m)]);
+            const leaveOneOut = m < 2 || Math.random() < 0.5;
+            if (leaveOneOut) {
+                pairs.splice(randomInt(pairs.length), 1);
+            }
+            if (m >= 2 && pairs.length > 0 && (!leaveOneOut || Math.random() < 0.3)) {
+                const [i, j] = pairs[randomInt(pairs.length)];
+                pairs.push([i, (j + 1 + randomInt(m - 1)) % m]);
+            }
+            return pairs;
+        }
+        default:
+            return null;
+    }
+}
+
+// Replace the relation arrows with a random mapping of the chosen kind
+// (in composition mode, both f and g get that kind)
+function drawRandomMapping() {
+    if (!state.layout || !state.layout.sets) return;
+
+    const kind = document.getElementById('random-type').value;
+    const mappings = getMappings();
+    const size = key => state.sets[key].elements.length;
+
+    const blocked = mappings.find(mapping => !randomPairs(kind, size(mapping.from), size(mapping.to)));
+    if (blocked) {
+        const names = { from: state.sets[blocked.from].name, to: state.sets[blocked.to].name };
+        showToast(t(`toast-random-${kind}-error`, names), 'error');
+        return;
+    }
+
+    const generate = () => mappings.flatMap(mapping =>
+        randomPairs(kind, size(mapping.from), size(mapping.to)).map(([i, j]) => ({
+            from: mapping.from,
+            fromIndex: i,
+            fromElement: state.sets[mapping.from].elements[i],
+            to: mapping.to,
+            toIndex: j,
+            toElement: state.sets[mapping.to].elements[j]
+        })));
+
+    // Small sets repeat often; retry a few times so each press visibly changes the drawing
+    const signature = arrows => arrows
+        .map(a => `${a.from}/${a.fromIndex}>${a.to}/${a.toIndex}`)
+        .sort()
+        .join(' ');
+    const current = signature(state.arrows);
+    let arrows = generate();
+    for (let attempt = 0; attempt < 10 && signature(arrows) === current; attempt++) {
+        arrows = generate();
+    }
+
+    state.arrows = arrows;
+    state.selected = null;
+    render();
+    showToast(t('toast-random-drawn', { type: t(`random-type-${kind}`) }), 'success');
 }
 
 function setupFunctionNameModal() {

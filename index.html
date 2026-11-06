@@ -92,6 +92,19 @@
 
                 <section class="panel-section">
                     <h2 class="section-title" data-i18n="section-edit">Edit</h2>
+                    <div class="random-row">
+                        <select id="random-type" aria-label="Random mapping type">
+                            <option value="function" data-i18n="random-type-function">Function</option>
+                            <option value="injective" data-i18n="random-type-injective">One-to-one function</option>
+                            <option value="bijective" data-i18n="random-type-bijective">One-to-one correspondence</option>
+                            <option value="constant" data-i18n="random-type-constant">Constant function</option>
+                            <option value="not-function" data-i18n="random-type-not-function">Not a function</option>
+                        </select>
+                        <button id="random-btn">
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="M2 6h1.4c1.3 0 2.5.6 3.3 1.7l.8 1.1"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/></svg>
+                            <span data-i18n="random-btn">Random</span>
+                        </button>
+                    </div>
                     <div class="button-group">
                         <button id="inverse-btn">
                             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>

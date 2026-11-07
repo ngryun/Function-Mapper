@@ -21,6 +21,27 @@ const SNAP_DISTANCE = 50;
 // Hangul, kana and CJK ideographs are drawn upright in a sans-serif font
 const CJK_PATTERN = /[ᄀ-ᇿ぀-ヿ㄰-㆏㐀-鿿가-힯]/;
 
+// Fonts for Hangul (and other CJK) labels. Web fonts are loaded only once chosen,
+// and the glyphs a drawing uses are embedded into exported PNG/SVG files.
+const FONTSOURCE = 'https://cdn.jsdelivr.net/npm/@fontsource';
+const CJK_FONTS = {
+    gothic: {
+        stack: "'Malgun Gothic', 'Apple SD Gothic Neo', AppleGothic, NanumGothic, 'Noto Sans KR', 'Noto Sans CJK KR', sans-serif"
+    },
+    myeongjo: {
+        family: 'Nanum Myeongjo',
+        css: [`${FONTSOURCE}/nanum-myeongjo@5.3.0/400.css`, `${FONTSOURCE}/nanum-myeongjo@5.3.0/700.css`],
+        stack: "'Nanum Myeongjo', Batang, AppleMyungjo, 'Noto Serif KR', 'Noto Serif CJK KR', 'Hiragino Mincho ProN', 'Yu Mincho', serif"
+    },
+    pen: {
+        family: 'Nanum Pen Script',
+        css: [`${FONTSOURCE}/nanum-pen-script@5.3.0/400.css`],
+        // Handwriting glyphs are drawn small within the em box
+        scale: 1.4,
+        stack: "'Nanum Pen Script', 'Malgun Gothic', 'Apple SD Gothic Neo', AppleGothic, sans-serif"
+    }
+};
+
 // Styles embedded in exported files (mirror the SVG rules in style.css)
 const EXPORT_STYLE = `
     .domain-ellipse, .codomain-ellipse, .third-set-ellipse { fill: none; stroke: #333; stroke-width: 2; }
@@ -45,6 +66,8 @@ const state = {
     showFunction: true,
     compositionMode: false,
     fontSize: 27,
+    // Key of CJK_FONTS used for Hangul labels
+    cjkFont: 'gothic',
     currentLanguage: 'en',
     // Set names and parsed elements, read from the inputs on every render
     sets: {
@@ -109,6 +132,10 @@ const translations = {
         'toast-svg-saved': 'SVG file saved successfully!',
         'toast-save-error': 'Error saving image. Please try again.',
         'random-btn': 'Random',
+        'cjk-font-label': 'Korean font',
+        'cjk-font-gothic': 'Gothic',
+        'cjk-font-myeongjo': 'Myeongjo',
+        'cjk-font-pen': 'Handwriting',
         'random-type-function': 'Function',
         'random-type-injective': 'One-to-one function',
         'random-type-bijective': 'One-to-one correspondence',
@@ -161,6 +188,10 @@ const translations = {
         'toast-svg-saved': 'SVG 파일이 성공적으로 저장되었습니다!',
         'toast-save-error': '이미지 저장 중 오류가 발생했습니다. 다시 시도하세요.',
         'random-btn': '무작위 대응',
+        'cjk-font-label': '한글 글꼴',
+        'cjk-font-gothic': '고딕',
+        'cjk-font-myeongjo': '명조',
+        'cjk-font-pen': '손글씨',
         'random-type-function': '함수',
         'random-type-injective': '일대일함수',
         'random-type-bijective': '일대일대응',
@@ -213,6 +244,10 @@ const translations = {
         'toast-svg-saved': 'SVGファイルが正常に保存されました！',
         'toast-save-error': '画像の保存中にエラーが発生しました。もう一度お試しください。',
         'random-btn': 'ランダム対応',
+        'cjk-font-label': 'ハングルフォント',
+        'cjk-font-gothic': 'ゴシック',
+        'cjk-font-myeongjo': '明朝',
+        'cjk-font-pen': '手書き',
         'random-type-function': '関数',
         'random-type-injective': '単射',
         'random-type-bijective': '全単射',
@@ -248,6 +283,12 @@ function initializeElements() {
     state.showFunction = showFunctionCheckbox.checked;
     state.compositionMode = compositionModeCheckbox.checked;
     applyCompositionLayout();
+
+    // Hangul font: a remembered choice, else what the browser restored
+    const fontSelect = document.getElementById('cjk-font');
+    const savedFont = readStored('cjk-font');
+    if (CJK_FONTS[savedFont]) fontSelect.value = savedFont;
+    state.cjkFont = CJK_FONTS[fontSelect.value] ? fontSelect.value : 'gothic';
 
     // Initialize language
     const savedLanguage = readStoredLanguage();
@@ -308,6 +349,17 @@ function setupEventListeners() {
         }
     }, { passive: false });
 
+    // Hangul font
+    document.getElementById('cjk-font').addEventListener('change', function() {
+        state.cjkFont = this.value;
+        try {
+            localStorage.setItem('cjk-font', this.value);
+        } catch (e) {
+            // Storage can be unavailable (private mode); the choice just isn't remembered
+        }
+        render();
+    });
+
     // Language selector
     document.getElementById('language-select').addEventListener('change', function() {
         state.currentLanguage = this.value;
@@ -345,11 +397,16 @@ function createSvgElement(tag, attributes = {}) {
 }
 
 // Create a text element with LaTeX-like formatting: x_1, x^2, x_{10}, f^{-1}, \circ
-function createMathText(x, y, content, className, fontSize) {
+function createMathText(x, y, content, className, baseSize) {
+    const isCjk = CJK_PATTERN.test(content);
+    const cjkFont = CJK_FONTS[state.cjkFont];
+    const fontSize = isCjk && cjkFont.scale ? baseSize * cjkFont.scale : baseSize;
+
     const text = createSvgElement('text', { x, y, 'font-size': fontSize });
     text.classList.add(className);
-    if (CJK_PATTERN.test(content)) {
+    if (isCjk) {
         text.classList.add('cjk-text');
+        text.style.fontFamily = cjkFont.stack;
     }
 
     // Raise/lower scripts with relative dy so the whole label stays centered on x
@@ -588,6 +645,45 @@ function render() {
         drawFunctionArrows();
     }
     renderSelection();
+    ensureCjkGlyphs();
+}
+
+// Stylesheets are added once; resolves when loaded (or failed, leaving fallback fonts)
+const stylesheetLoads = new Map();
+function loadStylesheet(href) {
+    if (!stylesheetLoads.has(href)) {
+        stylesheetLoads.set(href, new Promise(resolve => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.onload = resolve;
+            link.onerror = resolve;
+            document.head.appendChild(link);
+        }));
+    }
+    return stylesheetLoads.get(href);
+}
+
+// Labels are measured when drawn, so once a web font's glyphs arrive the drawing
+// is redrawn to center and space the labels with the real font
+const loadedGlyphs = new Set();
+function ensureCjkGlyphs() {
+    const key = state.cjkFont;
+    const font = CJK_FONTS[key];
+    if (!font.css) return;
+
+    const text = [...canvas.querySelectorAll('.cjk-text')].map(el => el.textContent).join('');
+    const missing = [...new Set(text)].filter(ch => !loadedGlyphs.has(`${key}:${ch}`)).join('');
+    if (!missing) return;
+
+    Promise.all(font.css.map(loadStylesheet))
+        .then(() => Promise.all(['400', '700'].map(weight =>
+            document.fonts.load(`${weight} 16px "${font.family}"`, missing))))
+        .catch(() => {})
+        .then(() => {
+            [...missing].forEach(ch => loadedGlyphs.add(`${key}:${ch}`));
+            if (state.cjkFont === key) render();
+        });
 }
 
 // Draw ellipses and their elements
@@ -968,12 +1064,16 @@ function clearDragPreview() {
     canvas.querySelectorAll('.temp-arrow, .snap-circle').forEach(el => el.remove());
 }
 
-function readStoredLanguage() {
+function readStored(key) {
     try {
-        return localStorage.getItem('preferred-language');
+        return localStorage.getItem(key);
     } catch (e) {
         return null;
     }
+}
+
+function readStoredLanguage() {
+    return readStored('preferred-language');
 }
 
 // Detect browser language and return supported language code
@@ -1209,7 +1309,7 @@ function closeFunctionNameModal() {
 }
 
 // Serialize the drawing as a standalone SVG document
-function buildExportSvg() {
+async function buildExportSvg() {
     const svgElement = canvas.cloneNode(true);
     svgElement.setAttribute('xmlns', SVG_NS);
 
@@ -1218,10 +1318,80 @@ function buildExportSvg() {
     svgElement.querySelectorAll('.element-selected').forEach(el => el.classList.remove('element-selected'));
 
     const style = createSvgElement('style');
-    style.textContent = EXPORT_STYLE;
+    style.textContent = EXPORT_STYLE + await embeddedFontCss(svgElement);
     svgElement.insertBefore(style, svgElement.firstChild);
 
     return new XMLSerializer().serializeToString(svgElement);
+}
+
+// True if a CSS unicode-range (e.g. "U+ac00-ac5b,U+ff07") covers any of the code points
+function unicodeRangeCovers(range, codePoints) {
+    return range.split(',').some(part => {
+        const [lo, hi = lo] = part.trim().replace(/^U\+/i, '').split('-');
+        const start = parseInt(lo.replace(/\?/g, '0'), 16);
+        const end = parseInt(hi.replace(/\?/g, 'f'), 16);
+        return [...codePoints].some(cp => cp >= start && cp <= end);
+    });
+}
+
+const fontDataUrls = new Map();
+async function fetchDataUrl(url) {
+    if (!fontDataUrls.has(url)) {
+        fontDataUrls.set(url, fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.arrayBuffer();
+            })
+            .then(buffer => {
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                for (let i = 0; i < bytes.length; i += 0x8000) {
+                    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+                }
+                return `data:font/woff2;base64,${btoa(binary)}`;
+            })
+            .catch(error => {
+                fontDataUrls.delete(url);
+                throw error;
+            }));
+    }
+    return fontDataUrls.get(url);
+}
+
+// @font-face rules carrying the chosen web font's glyphs that the drawing uses, so
+// exported files keep the font on computers that don't have it ('' if none or offline)
+async function embeddedFontCss(svgElement) {
+    const font = CJK_FONTS[state.cjkFont];
+    if (!font.css) return '';
+
+    // Element labels are regular; set and function names are bold
+    const codePointsOf = selector => new Set([...svgElement.querySelectorAll(selector)]
+        .flatMap(el => [...el.textContent].map(ch => ch.codePointAt(0))));
+    const byWeight = {
+        400: codePointsOf('.cjk-text.element-text'),
+        700: codePointsOf('.cjk-text.set-label, .cjk-text.function-name')
+    };
+    if (!byWeight[400].size && !byWeight[700].size) return '';
+
+    try {
+        const rules = await Promise.all(font.css.map(async href => {
+            const css = await (await fetch(href)).text();
+            const faces = css.match(/@font-face\s*{[^}]*}/g) || [];
+            return Promise.all(faces.map(async face => {
+                const weight = (/font-weight:\s*(\d+)/.exec(face) || [])[1] || '400';
+                // A font without a bold face (handwriting) also serves bold labels
+                const wanted = font.css.length > 1 ? byWeight[weight] : new Set([...byWeight[400], ...byWeight[700]]);
+                const range = /unicode-range:\s*([^;]+);/.exec(face);
+                const src = /url\(['"]?([^'")]+\.woff2)['"]?\)/.exec(face);
+                if (!wanted || !wanted.size || !src || (range && !unicodeRangeCovers(range[1], wanted))) return '';
+                const data = await fetchDataUrl(new URL(src[1], href).href);
+                return face.replace(/src:[^;]+;/, `src: url(${data}) format('woff2');`);
+            }));
+        }));
+        return '\n' + rules.flat().filter(Boolean).join('\n');
+    } catch (error) {
+        return '';
+    }
 }
 
 function downloadFile(href, filename) {
@@ -1232,10 +1402,10 @@ function downloadFile(href, filename) {
 }
 
 // Save as image
-function saveAsImage() {
+async function saveAsImage() {
     const width = Number(canvas.getAttribute('width'));
     const height = Number(canvas.getAttribute('height'));
-    const svgBlob = new Blob([buildExportSvg()], { type: 'image/svg+xml;charset=utf-8' });
+    const svgBlob = new Blob([await buildExportSvg()], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
     const img = new Image();
 
@@ -1266,8 +1436,8 @@ function saveAsImage() {
 }
 
 // Save as SVG function
-function saveAsSVG() {
-    const svgBlob = new Blob([buildExportSvg()], { type: 'image/svg+xml;charset=utf-8' });
+async function saveAsSVG() {
+    const svgBlob = new Blob([await buildExportSvg()], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
     downloadFile(url, 'function-mapping.svg');
 

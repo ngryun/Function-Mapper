@@ -102,7 +102,8 @@ h1 {
 }
 
 .language-selector select,
-.random-row select {
+.random-row select,
+.select-row select {
     height: 36px;
     padding: 0 34px 0 12px;
     border: 1px solid var(--border);
@@ -118,12 +119,14 @@ h1 {
 }
 
 .language-selector select:hover,
-.random-row select:hover {
+.random-row select:hover,
+.select-row select:hover {
     border-color: var(--border-strong);
 }
 
 .language-selector select:focus-visible,
-.random-row select:focus-visible {
+.random-row select:focus-visible,
+.select-row select:focus-visible {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--ring);
@@ -322,6 +325,24 @@ input[type="range"]:focus-visible {
 
 input[type="range"]:focus-visible::-webkit-slider-thumb {
     box-shadow: 0 0 0 4px var(--ring);
+}
+
+/* Label on the left, compact picker on the right */
+.select-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.select-row label {
+    margin-bottom: 0;
+}
+
+.select-row select {
+    width: 128px;
+    flex-shrink: 0;
 }
 
 /* Switches */
